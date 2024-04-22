@@ -1,4 +1,4 @@
-package com.apt.APTProjectBackend.models;
+package com.Backend.APTBackend.models;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;

@@ -1,6 +1,4 @@
-
-package com.apt.APTProjectBackend.controllers;
-
+package com.Backend.APTBackend.controllers;
 
 import java.util.List;
 
@@ -11,8 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.apt.APTProjectBackend.models.User;
-import com.apt.APTProjectBackend.services.UserService;
+import com.Backend.APTBackend.models.User;
+import com.Backend.APTBackend.services.UserService;
 
 @RestController
 @RequestMapping("/api/users")

@@ -1,4 +1,4 @@
-package com.apt.APTProjectBackend.models;
+package com.Backend.APTBackend.models;
 
 import java.sql.Date;
 import java.util.List;

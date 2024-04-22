@@ -1,12 +1,13 @@
-package com.apt.APTProjectBackend.services;
+package com.Backend.APTBackend.services;
+
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.apt.APTProjectBackend.models.User;
-import com.apt.APTProjectBackend.repositories.UserRepository;
+import com.Backend.APTBackend.models.User;
+import com.Backend.APTBackend.repositories.UserRepository;
 
 @Service
 public class UserService {
