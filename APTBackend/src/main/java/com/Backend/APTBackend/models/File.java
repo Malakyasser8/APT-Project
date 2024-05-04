@@ -41,7 +41,7 @@ public class File {
 	private String content;
 
 	@DocumentReference
-	private List<User> owners_ids;
+	private User owner_id;
 
 	@DocumentReference
 	private List<User> editors_ids;
