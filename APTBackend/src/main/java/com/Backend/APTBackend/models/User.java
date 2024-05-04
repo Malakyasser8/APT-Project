@@ -1,5 +1,8 @@
 package com.Backend.APTBackend.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.validation.annotation.Validated;
@@ -12,14 +15,12 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Document(collection = "user")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Validated
+@AllArgsConstructor
 @Getter
 @Setter
 public class User {
@@ -46,4 +47,18 @@ public class User {
 	@Size(max = 50)
 	@Email
 	private String email;
+
+	private List<String> tokens;
+
+	public User() {
+		this.tokens = new ArrayList<>();
+	}
+
+	public boolean addToTokens(String token) {
+		return tokens.add(token);
+	}
+
+	public boolean removeFromTokens(String token) {
+		return tokens.remove(token);
+	}
 }

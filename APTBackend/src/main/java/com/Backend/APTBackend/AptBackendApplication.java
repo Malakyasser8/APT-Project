@@ -18,6 +18,6 @@ public class AptBackendApplication {
 
 	@GetMapping("/")
 	public String get() {
-		return "K";
+		return "Working!";
 	}
 }

@@ -11,6 +11,8 @@ import com.Backend.APTBackend.models.User;
 @Repository
 public interface UserRepository extends MongoRepository<User, ObjectId> {
 
+    Optional<User> findBy_id(String id);
+
     Optional<User> findByUsername(String username);
 
     Boolean existsByUsername(String username);

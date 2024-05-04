@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.Backend.APTBackend.models.User;
 import com.Backend.APTBackend.repositories.UserRepository;
+import com.Backend.APTBackend.security.JwtToken;
 
 @Service
 public class UserService {
@@ -47,6 +48,31 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
+    public Boolean addToTokens(User user, String token) {
+        user.addToTokens(token);
+        try {
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public User verifyUserToken(String authorizationHeader) {
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+
+        String userId = JwtToken.getIdFromToken(token);
+        if (userId == null) {
+            return null;
+        }
+        Optional<User> optionalUser = userRepository.findBy_id(userId);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return user;
+        }
+        return null;
+    }
+
     public User createUser(String username, String email, String password) {
         User user = new User();
         user.setUsername(username);
@@ -69,12 +95,21 @@ public class UserService {
             User user = optionalUser.get();
             // System.out.println();
             if (encoder.matches(password, user.getPassword())) {
-                System.out.println(user);
                 return user;
             }
-            return null;
-        } else {
-            return null;
+        }
+        return null;
+    }
+
+    public boolean logoutUser(User user, String token) {
+        try {
+            boolean isRemoved = user.removeFromTokens(token);
+            if (!isRemoved)
+                return false;
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }
