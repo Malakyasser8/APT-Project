@@ -36,17 +36,19 @@ public class File {
 	@Size(min = 1)
 	private String filename;
 
-	private Date created_at;
+	//private Date created_at;
 
 	private String content;
 
 	@DocumentReference
-	private User owner_id;
+	private User owner;
 
 	@DocumentReference
 	private List<User> editors_ids;
 
 	@DocumentReference
 	private List<User> viewers_ids;
+
+	
 
 }
