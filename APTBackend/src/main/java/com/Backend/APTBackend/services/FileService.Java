@@ -19,8 +19,22 @@ public class FileService {
     private FileRepository FileRepository;
 
     public File createFile(User user,String filename) {
+        List<File> userFiles = FileRepository.findByOwnerId(user.get_id());
+        File openFile = null;
+        for (File file : userFiles) {
+            if (file.getFilename().equals(filename)) {
+                openFile = file;
+                break;
+            }
+        }
         File file = new File();
+        if(openFile!=null)
+        {
+            file.setFilename(filename+'1');
+        }
+        else{
         file.setFilename(filename);
+        }
         file.setOwner(user);
         // java.sql.Date sqlDate = new java.sql.Date(new Date().getTime());
         // file.setCreated_at(sqlDate);
@@ -33,8 +47,6 @@ public class FileService {
     }
     public boolean renameFile(User user, String filename ,String newFilename){
         List<File> userFiles = FileRepository.findByOwnerId(user.get_id());
-        System.out.println("rmmmmmmm");
-        System.out.println(userFiles);
         File fileToRename = null;
         for (File file : userFiles) {
             if (file.getFilename().equals(filename)) {
