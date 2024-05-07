@@ -1,8 +1,9 @@
 package com.Backend.APTBackend.services;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Arrays;
 
-import org.apache.el.stream.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -126,6 +127,26 @@ public class FileService {
         // return false;
     }
 
+    public List<File> getFilesUserOwned(String owner , int pageNum , int  pageSize){
+        List<File> owned = FileRepository.findByOwnerId(owner);
+        int fromIndex = (pageNum - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, owned.size());
+        return owned.subList(fromIndex, toIndex);
+    }
+
+    public List<File> getUserSharedFiles(String editor , int pageNum , int  pageSize){
+        List<File> editorFiles = FileRepository.findByEditorsId(editor);
+        List<File> viewer = FileRepository.findByViewersId(editor);
+        int fromIndex = (pageNum - 1) * pageSize;
+
+        editorFiles.addAll(viewer);
+        int toIndex = Math.min(fromIndex + pageSize, editorFiles.size());
+        return editorFiles.subList(fromIndex, toIndex);
+
+    }
+
+
+
     // Rawan: Access Control
     public boolean isOwner(String fileId, User user) {
         File foundFile = FileRepository.findByFileId(fileId);
@@ -141,7 +162,7 @@ public class FileService {
         if (foundFile == null) {
             return false;
         } else {
-            for (User editorId : foundFile.getEditors_ids()) {
+            for (User editorId : foundFile.getEditors()) {
                 if (editorId.get_id().equals(user.get_id())) {
                     return true;
                 }
@@ -155,7 +176,7 @@ public class FileService {
         if (foundFile == null) {
             return false;
         } else {
-            for (User viewerId : foundFile.getViewers_ids()) {
+            for (User viewerId : foundFile.getViewers()) {
                 if (viewerId.get_id().equals(user.get_id())) {
                     return true;
                 }
@@ -171,27 +192,29 @@ public class FileService {
         } else {
             if (role.equals("editor")) {
                 boolean isEditorIdPresent = false;
-                for (User editor : foundFile.getEditors_ids()) {
+                for (User editor : foundFile.getEditors()) {
                     if (editor.get_id().equals(user.get_id())) {
                         isEditorIdPresent = true;
                         break;
                     }
                 }
                 if (!isEditorIdPresent) {
-                    foundFile.getEditors_ids().add(user);
+                    foundFile.getViewers().removeIf(viewer -> viewer.get_id().equals(user.get_id()));
+                    foundFile.getEditors().add(user);
                 } else {
                     return false;
                 }
             } else if (role.equals("viewer")) {
                 boolean isViewerIdPresent = false;
-                for (User viewer : foundFile.getViewers_ids()) {
+                for (User viewer : foundFile.getViewers()) {
                     if (viewer.get_id().equals(user.get_id())) {
                         isViewerIdPresent = true;
                         break;
                     }
                 }
                 if (!isViewerIdPresent) {
-                    foundFile.getViewers_ids().add(user);
+                    foundFile.getEditors().removeIf(editor -> editor.get_id().equals(user.get_id()));
+                    foundFile.getViewers().add(user);
                 } else {
                     return false;
                 }

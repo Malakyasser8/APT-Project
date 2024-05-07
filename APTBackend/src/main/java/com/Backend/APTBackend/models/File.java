@@ -1,6 +1,5 @@
 package com.Backend.APTBackend.models;
 
-import java.sql.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -44,10 +43,10 @@ public class File {
 	private User owner;
 
 	@DocumentReference
-	private List<User> editors_ids;
+	private List<User> editors;
 
 	@DocumentReference
-	private List<User> viewers_ids;
+	private List<User> viewers;
 
 	
 
