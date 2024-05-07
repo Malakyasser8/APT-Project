@@ -1,4 +1,5 @@
 package com.Backend.APTBackend.repositories;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -10,18 +11,17 @@ import org.springframework.stereotype.Repository;
 import com.Backend.APTBackend.models.File;
 import com.Backend.APTBackend.models.User;
 
-
-
-
 @Repository
 public interface FileRepository extends MongoRepository<File, ObjectId> {
 
     Optional<File> findByFilename(String filename);
+
     Boolean existsByFilename(String filename);
 
-   @Query("{'owner._id': ?0}")
+    @Query("{'owner._id': ?0}")
     List<File> findByOwnerId(String ownerId);
 
-    
-    
+    // Rawan: Access Control, find file by id
+    @Query("{'_id': ?0}")
+    File findByFileId(String fileId);
 }
