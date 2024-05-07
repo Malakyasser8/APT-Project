@@ -1,80 +1,33 @@
-import React, { useState } from "react";
-import { Editor } from "react-draft-wysiwyg";
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { EditorState } from "draft-js";
-import { render } from "react-dom";
+import React, { useState } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
-function TextEditor() {
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
-  const onEditorStateChange = (editorState) => {
-    setEditorState(editorState);
-  };
 
-  const toolbarOptions = {
-    options: [
-      "inline",
-      "blockType",
-      "fontSize",
-      "fontFamily",
-      "list",
-      "textAlign",
-      "colorPicker",
-      "link",
-      "embedded",
-      "emoji",
-      "remove",
-      "history",
-    ],
-    inline: {
-      options: ["bold", "italic", "underline", "strikethrough"],
-    },
-    blockType: {
-      options: [
-        "Normal",
-        "H1",
-        "H2",
-        "H3",
-        "H4",
-        "H5",
-        "H6",
-        "Blockquote",
-        "Code",
-      ],
-    },
-    fontFamily: {
-      options: [
-        "Arial",
-        // "Georgia",
-        // "Impact",
-        // "Tahoma",
-        // "Times New Roman",
-        // "Verdana",
-      ],
-    },
-    fontSize: {
-      options: [8, 10, 12, 14, 18, 24, 30, 36],
-    },
-    list: {
-      options: ["unordered", "ordered"],
-    },
-    textAlign: {
-      options: ["left", "center", "right", "justify"],
-    },
+const TextEditor = ({ fileContent }) => {
+  const [editorHtml, setEditorHtml] = useState(fileContent);
+
+  const handleEditorChange = (html) => {
+    const cleanText =
+      new DOMParser().parseFromString(html, 'text/html').body.textContent || '';
+    setEditorHtml(html);
   };
 
   return (
-    <div>
-      <Editor
-        editorState={editorState}
-        toolbarClassName="toolbarClassName"
-        wrapperClassName="wrapperClassName"
-        editorClassName="editorClassName"
-        onEditorStateChange={onEditorStateChange}
-        toolbar={toolbarOptions}
-      />
-    </div>
+    <>
+      <div className='flex flex-col'>
+        <div className='w-full sm:w-full md:w-full lg:w-full xl:w-full'>
+          <ReactQuill
+            theme='snow'
+            value={editorHtml}
+            onChange={handleEditorChange}
+            className='w-full h-40 sm:h-20 md:h-40 lg:h-144 xl:h-160 mb-4'
+            placeholder='Text (optional) '
+          />
+        </div>
+      </div>
+    </>
   );
-}
+};
 
 export default TextEditor;

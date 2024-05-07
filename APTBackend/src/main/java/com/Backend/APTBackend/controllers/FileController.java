@@ -142,7 +142,7 @@ public class FileController {
     }
 
     @GetMapping("/owned")
-    public ResponseEntity<?> getOwnerFiles(@RequestParam String id,
+    public ResponseEntity<?> getOwnerFiles(
             @RequestParam(required = false, defaultValue = "1") int pageNum,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestHeader("Authorization") String authorizationHeader) {
@@ -155,11 +155,11 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
         }
        
-        return new ResponseEntity<List<File>>(fileService.getFilesUserOwned(id , pageNum , pageSize), HttpStatus.OK);
+        return new ResponseEntity<List<File>>(fileService.getFilesUserOwned(user.get_id() , pageNum , pageSize), HttpStatus.OK);
     }
 
     @GetMapping("/shared")
-    public ResponseEntity<?> getSharedFiles(@RequestParam String id,
+    public ResponseEntity<?> getSharedFiles(
             @RequestParam(required = false, defaultValue = "1") int pageNum,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestHeader("Authorization") String authorizationHeader) {
@@ -172,7 +172,7 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
         }
        
-        return new ResponseEntity<List<File>>(fileService.getUserSharedFiles(id , pageNum , pageSize), HttpStatus.OK);
+        return new ResponseEntity<List<File>>(fileService.getUserSharedFiles(user.get_id() , pageNum , pageSize), HttpStatus.OK);
     }
 
 }

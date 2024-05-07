@@ -8,7 +8,7 @@ function CreateDocumentButton() {
       to="/document"
       className="block px-4 py-2 bg-white text-white rounded-md hover:bg-white mt-6 text-center"
     >
-      <DocumentPlusIcon color="black" strokeWidth={2.5} className="h-14 w-14" />
+      <DocumentPlusIcon color="black" strokeWidth={2.5} className="h-9 w-9" />
     </Link>
   );
 }

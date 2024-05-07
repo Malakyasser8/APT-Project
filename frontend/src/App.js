@@ -34,7 +34,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/homepage" element={<Homepage />} />
-          <Route path="/document" element={<Document />} />
+          <Route path="/document/:id" element={<Document />} />
         </Routes>
       </Router>
       </QueryClientProvider>

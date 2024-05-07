@@ -1,7 +1,7 @@
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "react-query";
-import { saveToken } from "../utils/tokens_helper";
+import { saveToken, saveUsername } from "../utils/tokens_helper";
 import { postRequest } from "../API/User";
 import { useState } from "react";
 
@@ -15,7 +15,9 @@ function Login() {
   const mutation = useMutation(postRequest, {
     onSuccess: (response) => {
       const { token } = response;
+      console.log(response,'tok');
       saveToken(token);
+      saveUsername(username)
       navigate(`/homepage`);
     },
     onError: (error) => {
@@ -39,7 +41,7 @@ function Login() {
     }
   };
   return (
-    <div class="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-center h-screen">
       <Card color="transparent" shadow={false}>
         <Typography variant="h4" color="blue-gray">
           Login
@@ -50,7 +52,7 @@ function Login() {
         <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="h6" color="blue-gray" className="-mb-3">
-              Your Email
+              Your Username
             </Typography>
             <Input
               size="lg"

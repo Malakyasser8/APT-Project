@@ -37,7 +37,7 @@ public class File {
 
 	//private Date created_at;
 
-	private String content;
+	private String content="";
 
 	@DocumentReference
 	private User owner;
