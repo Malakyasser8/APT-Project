@@ -14,14 +14,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Backend.APTBackend.models.File;
 import com.Backend.APTBackend.models.User;
 import com.Backend.APTBackend.security.JwtToken;
 import com.Backend.APTBackend.services.UserService;
-
 import com.Backend.APTBackend.services.FileService;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -90,5 +91,39 @@ public class FileController {
 
        boolean deleted = fileService.deleteFile(user,filename.getFilename());
         return new ResponseEntity<Boolean>(deleted, HttpStatus.OK);
+    }
+
+    @GetMapping("/owned")
+    public ResponseEntity<?> getOwnerFiles(@RequestParam String id,
+            @RequestParam(required = false, defaultValue = "1") int pageNum,
+            @RequestParam(required = false, defaultValue = "10") int pageSize,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isEmpty() || authorizationHeader.length() < 9) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authorization header missing");
+        }
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        User user = userService.verifyUserToken(authorizationHeader);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
+        }
+       
+        return new ResponseEntity<List<File>>(fileService.getFilesUserOwned(id , pageNum , pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/shared")
+    public ResponseEntity<?> getSharedFiles(@RequestParam String id,
+            @RequestParam(required = false, defaultValue = "1") int pageNum,
+            @RequestParam(required = false, defaultValue = "10") int pageSize,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isEmpty() || authorizationHeader.length() < 9) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authorization header missing");
+        }
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        User user = userService.verifyUserToken(authorizationHeader);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
+        }
+       
+        return new ResponseEntity<List<File>>(fileService.getUserSharedFiles(id , pageNum , pageSize), HttpStatus.OK);
     }
 }

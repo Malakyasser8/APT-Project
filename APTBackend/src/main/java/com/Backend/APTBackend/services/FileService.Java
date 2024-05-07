@@ -4,6 +4,7 @@ package com.Backend.APTBackend.services;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import com.Backend.APTBackend.models.User;
 import com.Backend.APTBackend.repositories.FileRepository;
 
 @Service
-public class FileService {
+public class FileService{
 
     @Autowired
     private FileRepository FileRepository;
@@ -80,8 +81,24 @@ public class FileService {
         
         return false;
     }
-         
-    
+
+    public List<File> getFilesUserOwned(String owner , int pageNum , int  pageSize){
+        List<File> owned = FileRepository.findByOwnerId(owner);
+        int fromIndex = (pageNum - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, owned.size());
+        return owned.subList(fromIndex, toIndex);
+    }
+
+    public List<File> getUserSharedFiles(String editor , int pageNum , int  pageSize){
+        List<File> editorFiles = FileRepository.findByEditorsId(editor);
+        List<File> viewer = FileRepository.findByViewersId(editor);
+        int fromIndex = (pageNum - 1) * pageSize;
+
+        editorFiles.addAll(viewer);
+        int toIndex = Math.min(fromIndex + pageSize, editorFiles.size());
+        return editorFiles.subList(fromIndex, toIndex);
+
+    }
 
 };
 

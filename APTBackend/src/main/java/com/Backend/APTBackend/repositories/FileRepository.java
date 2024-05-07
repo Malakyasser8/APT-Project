@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.Backend.APTBackend.models.File;
-import com.Backend.APTBackend.models.User;
 
 
 
@@ -22,6 +21,10 @@ public interface FileRepository extends MongoRepository<File, ObjectId> {
    @Query("{'owner._id': ?0}")
     List<File> findByOwnerId(String ownerId);
 
+    @Query("{'editors._id': ?0}")
+    List<File> findByEditorsId(String userId);
+    @Query("{'viewers._id': ?0}")
+    List<File> findByViewersId(String userId);
     
     
 }
