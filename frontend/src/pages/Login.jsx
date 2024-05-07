@@ -1,7 +1,43 @@
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation } from "react-query";
+import { saveToken } from "../utils/tokens_helper";
+import { postRequest } from "../API/User";
+import { useState } from "react";
 
 function Login() {
+  const navigate = useNavigate();
+  const [errormessage, setErrorMessage] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [usernameError, setUsernameError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const mutation = useMutation(postRequest, {
+    onSuccess: (response) => {
+      const { token } = response;
+      saveToken(token);
+      navigate(`/homepage`);
+    },
+    onError: (error) => {
+      console.log("error", error.message);
+      setErrorMessage(true);
+    },
+  });
+  const handleOnSubmit = () => {
+    if (username == "") {
+      setUsernameError(true);
+    } else if (password == "") {
+      setPasswordError(true);
+      setUsernameError(false);
+    } else {
+      setPasswordError(false);
+      setUsernameError(false);
+      mutation.mutate({
+        endPoint: "api/users/login",
+        data: { username: username, password: password },
+      });
+    }
+  };
   return (
     <div class="flex justify-center items-center h-screen">
       <Card color="transparent" shadow={false}>
@@ -23,8 +59,14 @@ function Login() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              onChange={(e) => setUsername(e.target.value)}
             />
-            <Typography variant="h6" color="blue-gray" className="-mb-3">
+            {usernameError && (
+              <Typography color="red" className="mb-3">
+                Enter Username
+              </Typography>
+            )}
+            <Typography variant="h6" color="blue-gray" className="mb-3">
               Password
             </Typography>
             <Input
@@ -35,20 +77,34 @@ function Login() {
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
+              onChange={(e) => setPassword(e.target.value)}
             />
+             {passwordError && (
+              <Typography color="red" className="mb-3">
+                Enter Password
+              </Typography>
+            )}
           </div>
-          <Link
-            to="/homepage"
+          <Button
             className="block px-4 py-2 bg-black text-white rounded-md hover:bg-black mt-6 text-center"
+            onClick={handleOnSubmit}
           >
             Login
-          </Link>
+          </Button>
           <Typography color="gray" className="mt-4 text-center font-normal">
             Don't have an account?{" "}
-            <a href="/signup" className="font-medium text-gray-900">
+            <Link to="/signup" className="font-medium text-gray-900">
               Sign Up
-            </a>
+            </Link>
           </Typography>
+          {errormessage && (
+            <Typography
+              color="red"
+              className="mt-4 text-center font-normal text-xl"
+            >
+              Invalid Username or Password
+            </Typography>
+          )}
         </form>
       </Card>
     </div>
