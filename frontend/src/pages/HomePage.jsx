@@ -21,11 +21,16 @@ function Homepage() {
   const [openCDModal, setOpenCDModal] = useState(false);
   const handleOpenCDModal = () => setOpenCDModal(!openCDModal);
   return (
-    <>
+    <div>
       <div className="my-2">
         <Navbar className="sticky  h-max max-w-full rounded-none px-4 py-2 lg:px-8 lg:py-4">
           <div className="flex items-center justify-between text-blue-gray-900">
-            <Typography className="mr-4 cursor-pointer py-1.5 font-semibold text-lg" onClick={()=>{navigate('/homepage')}}>
+            <Typography
+              className="mr-4 cursor-pointer py-1.5 font-semibold text-lg"
+              onClick={() => {
+                navigate("/homepage");
+              }}
+            >
               Ree Docs
             </Typography>
             <div className="flex items-center gap-4">
@@ -50,12 +55,22 @@ function Homepage() {
           </div>
         </Navbar>
       </div>
-      <div className="flex justify-between items-center h-screen">
-        <DocumentList endpoint='api/files/owned'/>
-        <DocumentList endpoint='api/files/shared'/>
+      <div className="flex justify-between items-center my-20 mx-14 ">
+        <div>
+          <Typography className="mb-8 font-semibold text-lg">
+            Your Documents
+          </Typography>
+          <DocumentList endpoint="api/files/owned" owned={true} />
+        </div>
+        <div>
+        <Typography className="mb-8 font-semibold text-lg">
+            Shared Documents
+          </Typography>
+          <DocumentList endpoint="api/files/shared" owned={false} />
+        </div>
       </div>
       <CreateDocumentModal open={openCDModal} handleOpen={handleOpenCDModal} />
-    </>
+    </div>
   );
 }
 

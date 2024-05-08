@@ -9,29 +9,47 @@ import React, { useState } from "react";
 import { postRequest } from "../API/User";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-export default function CreateDocumentModal({ handleOpen, open }) {
+export default function RenameShareModal({
+  handleOpen,
+  open,
+  endpoint,
+  rename,
+  refetch,
+}) {
   const [text, setText] = useState("");
   const handleChange = (event) => {
     const newText = event.target.value;
     setText(newText);
   };
   const handleSaveButton = () => {
-    postRequest({
-      endPoint: "api/files/create",
-      data: {
-        filename: text,
-      },
-      onSuccess: (data) => {
-        
-      },
-    });
+    if (rename) {
+      postRequest({
+        endPoint: endpoint,
+        data: {
+          filename: text,
+        },
+        onSuccess: (data) => {refetch();},
+      });
+    } else {
+      postRequest({
+        endPoint: endpoint,
+        data: {
+          userToShareWith: text,
+        },
+        onSuccess: (data) => {},
+      });
+    }
     handleOpen();
   };
   return (
     <>
       <Dialog size="sm" open={open} handler={handleOpen} className="pb-5">
         <DialogHeader className=" text-center  justify-between border-b border-lines-color">
-          <h2 className="pl-36">Enter File name</h2>
+          {rename ? (
+            <h2 className="pl-36">Enter new File name</h2>
+          ) : (
+            <h2 className="pl-36">Enter username</h2>
+          )}
           <XMarkIcon
             strokeWidth={3.5}
             className="h-[20px] w-[20px]"

@@ -93,7 +93,7 @@ public class FileController {
     }
 
     @PostMapping("/delete/{fileId}")
-    public ResponseEntity<?> getFile(@PathVariable String fileId,
+    public ResponseEntity<?> deleteFile(@PathVariable String fileId,
             @RequestHeader("Authorization") String authorizationHeader) {
         if (authorizationHeader == null || authorizationHeader.isEmpty() || authorizationHeader.length() < 9) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authorization header missing");
@@ -104,8 +104,8 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
         }
 
-        boolean deleted = fileService.deleteFile(user, fileId);
-        return new ResponseEntity<Boolean>(deleted, HttpStatus.OK);
+        String deleted = fileService.deleteFile(user, fileId);
+        return new ResponseEntity<String>(deleted, HttpStatus.OK);
     }
 
     // Rawan: Access Control, Share File

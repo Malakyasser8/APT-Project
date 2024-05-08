@@ -10,9 +10,10 @@ import { useMutation } from "react-query";
 import { useEffect, useState } from "react";
 import { fetchRequest } from "../API/User";
 import { useNavigate } from "react-router-dom";
-export function DocumentList({ endpoint }) {
+export function DocumentList({ endpoint ,owned }) {
   const fetchReq = useMutation(fetchRequest);
   const [response, setResponse] = useState();
+  const [refetchKey, setRefetchKey] = useState(0);
   const navigate = useNavigate();
   useEffect(() => {
     fetchReq.mutate(endpoint, {
@@ -22,10 +23,14 @@ export function DocumentList({ endpoint }) {
       },
       onError: (err) => {},
     });
-  }, []);
+  }, [refetchKey]);
+  const triggerRefetch = () => {
+    // Increment the refetchKey, this will trigger useEffect to refetch data
+    setRefetchKey((prevKey) => prevKey + 1);
+  };
   
   return (
-    <Card className="w-96">
+    <Card className="w-[600px] bg-black rounded-none">
       <List>
         {response && (
           <>
@@ -33,13 +38,14 @@ export function DocumentList({ endpoint }) {
               <ListItem
                 key={document._id}
                 ripple={false}
-                className="py-1 pr-1 pl-4"
-                onClick={() => navigate(`/document/${document._id}`)}
+                className="py-1 pr-1 pl-4 text-white hover:bg-black"
               >
-                {document.filename}
+                <div onClick={() => navigate(`/document/${document._id}`)}>
+                  {document.filename}
+                </div>
                 <ListItemSuffix>
                   <IconButton variant="text" color="blue-gray">
-                    <DropDown />
+                    <DropDown documentId={document._id} refetch={triggerRefetch}  owned={owned}/>
                   </IconButton>
                 </ListItemSuffix>
               </ListItem>

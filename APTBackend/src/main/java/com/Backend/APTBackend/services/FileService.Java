@@ -102,16 +102,18 @@ public class FileService {
         // return openFile;
     }
 
-    public Boolean deleteFile(User user, String fileId) {
+    public String deleteFile(User user, String fileId) {
         File foundFile = FileRepository.findByFileId(fileId);
         if (foundFile == null) {
-            return false;
+            System.out.println("fileid");
+            System.out.println(fileId);
+            return "file not found";
         } else {
             if (isOwner(fileId, user)) {
                 FileRepository.delete(foundFile);
-                return true;
+                return "deleted";
             }
-            return false;
+            return "owner";
         }
         // List<File> userFiles = FileRepository.findByOwnerId(user.get_id());
         // System.out.println("rmmmmmmm");
