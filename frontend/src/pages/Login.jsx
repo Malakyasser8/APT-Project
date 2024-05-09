@@ -15,13 +15,11 @@ function Login() {
   const mutation = useMutation(postRequest, {
     onSuccess: (response) => {
       const { token } = response;
-      console.log(response,'tok');
       saveToken(token);
       saveUsername(username)
       navigate(`/homepage`);
     },
     onError: (error) => {
-      console.log("error", error.message);
       setErrorMessage(true);
     },
   });

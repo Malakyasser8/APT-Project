@@ -10,11 +10,15 @@ import org.springframework.stereotype.Service;
 import com.Backend.APTBackend.models.User;
 import com.Backend.APTBackend.models.File;
 import com.Backend.APTBackend.repositories.FileRepository;
+import com.Backend.APTBackend.services.UserService;
 
 @Service
 public class FileService {
     @Autowired
     private FileRepository FileRepository;
+
+    @Autowired
+    private UserService userservice;
 
     public File createFile(User user, String filename) {
         List<File> userFiles = FileRepository.findByOwnerId(user.get_id());
@@ -187,44 +191,52 @@ public class FileService {
         }
     }
 
-    public boolean shareFile(String fileId, User user, String role) {
+    public boolean shareFile(String fileId, String username, String role) {
         File foundFile = FileRepository.findByFileId(fileId);
-        if (foundFile == null) {
-            return false;
-        } else {
-            if (role.equals("editor")) {
-                boolean isEditorIdPresent = false;
-                for (User editor : foundFile.getEditors()) {
-                    if (editor.get_id().equals(user.get_id())) {
-                        isEditorIdPresent = true;
-                        break;
-                    }
-                }
-                if (!isEditorIdPresent) {
-                    foundFile.getViewers().removeIf(viewer -> viewer.get_id().equals(user.get_id()));
-                    foundFile.getEditors().add(user);
-                } else {
-                    return false;
-                }
-            } else if (role.equals("viewer")) {
-                boolean isViewerIdPresent = false;
-                for (User viewer : foundFile.getViewers()) {
-                    if (viewer.get_id().equals(user.get_id())) {
-                        isViewerIdPresent = true;
-                        break;
-                    }
-                }
-                if (!isViewerIdPresent) {
-                    foundFile.getEditors().removeIf(editor -> editor.get_id().equals(user.get_id()));
-                    foundFile.getViewers().add(user);
-                } else {
-                    return false;
-                }
-            } else {
+        Optional<User> user=userservice.findByUsername(username);
+        System.out.println(user);
+        if(user.isPresent()){
+            User userr=user.get();
+            if (foundFile == null) {
                 return false;
+            } else {
+                if (role.equals("editor")) {
+                    boolean isEditorIdPresent = false;
+                    for (User editor : foundFile.getEditors()) {
+                        if (editor.get_id().equals(userr.get_id())) {
+                            isEditorIdPresent = true;
+                            break;
+                        }
+                    }
+                    if (!isEditorIdPresent) {
+                        foundFile.getViewers().removeIf(viewer -> viewer.get_id().equals(userr.get_id()));
+                        foundFile.getEditors().add(userr);
+                    } else {
+                        return false;
+                    }
+                } else if (role.equals("viewer")) {
+                    boolean isViewerIdPresent = false;
+                    for (User viewer : foundFile.getViewers()) {
+                        if (viewer.get_id().equals(userr.get_id())) {
+                            isViewerIdPresent = true;
+                            break;
+                        }
+                    }
+                    if (!isViewerIdPresent) {
+                        foundFile.getEditors().removeIf(editor -> editor.get_id().equals(userr.get_id()));
+                        foundFile.getViewers().add(userr);
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+                FileRepository.save(foundFile);
+                return true;
             }
-            FileRepository.save(foundFile);
-            return true;
+        }
+        else{
+            return false;
         }
     }
 

@@ -42,10 +42,9 @@ function SignUp() {
     onSuccess: (response) => {
       const { token } = response;
       saveToken(token);
-      navigate(`/login`);
+      navigate(`/`);
     },
     onError: (error) => {
-      console.log("error", error.message);
       setErrorMessage(true);
     },
   });
@@ -122,7 +121,7 @@ function SignUp() {
             )}
           </div>
           <Button
-            to="/login"
+            to="/"
             className="block px-4 py-2 bg-black text-white rounded-md hover:bg-black mt-6 text-center w-full"
             onClick={handleOnSubmit}
           >
@@ -130,7 +129,7 @@ function SignUp() {
           </Button>
           <Typography color="gray" className="mt-4 text-center font-normal">
             Already have an account?{" "}
-            <a href="/login" className="font-medium text-gray-900">
+            <a href="/" className="font-medium text-gray-900">
               Login
             </a>
           </Typography>

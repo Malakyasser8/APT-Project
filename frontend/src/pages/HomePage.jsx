@@ -16,7 +16,7 @@ function Homepage() {
       data: { username: username },
     });
     localStorage.clear();
-    navigate("/login");
+    navigate("/");
   };
   const [openCDModal, setOpenCDModal] = useState(false);
   const handleOpenCDModal = () => setOpenCDModal(!openCDModal);
