@@ -4,6 +4,7 @@ import {
   DialogFooter,
   DialogHeader,
   Button,
+  Typography
 } from "@material-tailwind/react";
 import React, { useState } from "react";
 import { postRequest } from "../API/User";
@@ -28,7 +29,9 @@ export default function RenameShareModal({
         data: {
           filename: text,
         },
-        onSuccess: (data) => {refetch();},
+        onSuccess: (data) => {
+          refetch();
+        },
       });
     } else {
       postRequest({
@@ -65,13 +68,53 @@ export default function RenameShareModal({
             value={text}
           />
           <div>{text.length}/40</div>
+          {!rename && (
+            <>
+              <div className="flex flex-col gap-4 mt-5">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="viewer"
+                    name="viewer"
+                    value="viewer"
+                    //checked={selectedOption === "Required domains"}
+                    //onChange={() => setSelectedOption("Required domains")}
+                    className="mr-2"
+                  />
+                  <Typography
+                    color="black"
+                    className="font-normal flex text-sm gap-2 items-center"
+                  >
+                    Share as viewer
+                  </Typography>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="editor"
+                    name="editor"
+                    value="editor"
+                    //checked={selectedOption === "Blocked domains"}
+                    //onChange={() => setSelectedOption("Blocked domains")}
+                    className="mr-2"
+                  />
+                  <Typography
+                    color="black"
+                    className="font-normal flex text-sm gap-2 items-center"
+                  >
+                    Share as editor
+                  </Typography>
+                </div>
+              </div>
+            </>
+          )}
         </DialogBody>
         <DialogFooter>
           <Button
             className="block px-4 py-2 bg-black text-white rounded-md hover:bg-black mt-6 text-center"
             onClick={handleSaveButton}
           >
-            Save
+            {rename ? <>Save</> : <>Share</>}
           </Button>
         </DialogFooter>
       </Dialog>

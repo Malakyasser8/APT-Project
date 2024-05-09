@@ -27,8 +27,10 @@ export function DropDown({ documentId, refetch, owned }) {
       }
     );
   };
-  const [openRSModal, setOpenRSModal] = useState(false);
-  const handleOpenRSModal = () => setOpenRSModal(!openRSModal);
+  const [openRModal, setOpenRModal] = useState(false);
+  const handleOpenRModal = () => setOpenRModal(!openRModal);
+  const [openSModal, setOpenSModal] = useState(false);
+  const handleOpenSModal = () => setOpenSModal(!openSModal);
 
   return (
     <>
@@ -39,14 +41,21 @@ export function DropDown({ documentId, refetch, owned }) {
           </Button>
         </MenuHandler>
         <MenuList className="bg-black text-white">
-          <MenuItem onClick={handleOpenRSModal}>Rename</MenuItem>
+          <MenuItem onClick={handleOpenRModal}>Rename</MenuItem>
           {owned && <MenuItem onClick={handleDelete}>Delete</MenuItem>}
-          <MenuItem>Share</MenuItem>
+          <MenuItem onClick={handleOpenSModal}>Share</MenuItem>
         </MenuList>
       </Menu>
       <RenameShareModal
-        handleOpen={handleOpenRSModal}
-        open={openRSModal}
+        handleOpen={handleOpenSModal}
+        open={openSModal}
+        endpoint={`api/files/sharetoEditor/${documentId}`}
+        rename={false}
+        refetch={refetch}
+      />
+      <RenameShareModal
+        handleOpen={handleOpenRModal}
+        open={openRModal}
         endpoint={`api/files/rename/${documentId}`}
         rename={true}
         refetch={refetch}
