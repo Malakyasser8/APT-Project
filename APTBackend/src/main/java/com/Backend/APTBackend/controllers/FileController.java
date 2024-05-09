@@ -72,8 +72,9 @@ public class FileController {
         String filename = jsonNode.get("filename").asText();
         System.out.println(filename);
         Boolean status = fileService.renameFile(user, fileId, filename);
-
         return new ResponseEntity<Boolean>(status, HttpStatus.OK);
+
+        
     }
 
     @GetMapping("/open/{fileId}")
@@ -110,7 +111,7 @@ public class FileController {
 
     // Rawan: Access Control, Share File
     @PostMapping("/sharetoEditor/{fileId}")
-    public ResponseEntity<?> shareFiletoEditor(@PathVariable String fileId, @RequestBody User userToShareWith,
+    public ResponseEntity<?> shareFiletoEditor(@PathVariable String fileId, @RequestBody User username,
             @RequestHeader("Authorization") String authorizationHeader) {
         if (authorizationHeader == null || authorizationHeader.isEmpty() || authorizationHeader.length() < 9) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authorization header missing");
@@ -120,9 +121,10 @@ public class FileController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
         }
-
-        boolean shared = fileService.shareFile(fileId, userToShareWith, "editor");
-        return new ResponseEntity<Boolean>(shared, HttpStatus.OK);
+        boolean shared = fileService.shareFile(fileId, username.getUsername(), "editor");
+        if(shared){
+        return new ResponseEntity<Boolean>(shared, HttpStatus.OK);}
+        else{return ResponseEntity.status(HttpStatus.FORBIDDEN).body("username not found");}
     }
 
     @PostMapping("/sharetoViewer/{fileId}")
@@ -137,8 +139,10 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
         }
 
-        boolean shared = fileService.shareFile(fileId, userToShareWith, "viewer");
-        return new ResponseEntity<Boolean>(shared, HttpStatus.OK);
+        boolean shared = fileService.shareFile(fileId, userToShareWith.getUsername(), "viewer");
+        if(shared){
+            return new ResponseEntity<Boolean>(shared, HttpStatus.OK);}
+            else{return ResponseEntity.status(HttpStatus.FORBIDDEN).body("username not found");}
     }
 
     @GetMapping("/owned")

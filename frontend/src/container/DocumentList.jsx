@@ -30,7 +30,7 @@ export function DocumentList({ endpoint ,owned }) {
   };
   
   return (
-    <Card className="w-[600px] bg-black rounded-none">
+    <Card className="w-[500px] bg-black rounded-none">
       <List>
         {response && (
           <>
@@ -56,12 +56,4 @@ export function DocumentList({ endpoint ,owned }) {
     </Card>
   );
 }
-// {
-//   response && (
-//     <>
-//       {response.map((comment: CommentType) => (
-//         <Comment key={comment._id} comment={comment} showButton={true} />
-//       ))}
-//     </>
-//   );
-// }
+

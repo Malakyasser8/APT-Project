@@ -49,14 +49,14 @@ export function DropDown({ documentId, refetch, owned }) {
       <RenameShareModal
         handleOpen={handleOpenSModal}
         open={openSModal}
-        endpoint={`api/files/sharetoEditor/${documentId}`}
+        documentId={documentId}
         rename={false}
         refetch={refetch}
       />
       <RenameShareModal
         handleOpen={handleOpenRModal}
         open={openRModal}
-        endpoint={`api/files/rename/${documentId}`}
+        documentId={documentId}
         rename={true}
         refetch={refetch}
       />
