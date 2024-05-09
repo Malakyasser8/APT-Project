@@ -19,18 +19,20 @@ function Document() {
       data: { username: username },
     });
     localStorage.clear();
-    navigate("/login");
+    navigate("/");
   };
   const [openCDModal, setOpenCDModal] = useState(false);
   const handleOpenCDModal = () => setOpenCDModal(!openCDModal);
   const fetchReq = useMutation(fetchRequest);
   const { id } = useParams();
   const [response, setResponse] = useState("");
+  const [showEditor, setShowEditor] = useState(false);
   useEffect(() => {
     fetchReq.mutate(`api/files/open/${id}`, {
       onSuccess: (data) => {
-        setResponse(data.data.content);
         console.log("fileopened", data.data.content);
+        setShowEditor(true);
+        setResponse(data.data.content);
       },
       onError: (err) => {},
     });
@@ -41,7 +43,12 @@ function Document() {
       <div className="my-2 mb-8">
         <Navbar className="sticky  h-max max-w-full rounded-none px-4 py-2 lg:px-8 lg:py-4">
           <div className="flex items-center justify-between text-blue-gray-900">
-            <Typography className="mr-4 cursor-pointer py-1.5 font-semibold text-lg" onClick={()=>{navigate('/homepage')}}>
+            <Typography
+              className="mr-4 cursor-pointer py-1.5 font-semibold text-lg"
+              onClick={() => {
+                navigate("/homepage");
+              }}
+            >
               Ree Docs
             </Typography>
             <div className="flex items-center gap-4">
@@ -66,7 +73,7 @@ function Document() {
           </div>
         </Navbar>
       </div>
-      <TextEditor fileContent={response || ""} />
+      {showEditor && <TextEditor fileContent={response || ""} />}
       <CreateDocumentModal open={openCDModal} handleOpen={handleOpenCDModal} />
     </div>
   );

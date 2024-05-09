@@ -23,7 +23,7 @@ axios.interceptors.response.use(
   (response) => {
     let data = response.data;
     let noStatus = false;
-    console.log(response, "da response");
+    
     if (noStatus) data = Object.values(data)[0]; // Last object in the response
     if (data == undefined) data = "ok";
     response.data = data;
@@ -43,7 +43,7 @@ const fetchRequest = async (endPoint) => {
       },
       withCredentials: false,
     });
-    console.log(response);
+    // console.log(response);
 
     return response;
   } catch (error) {
@@ -66,7 +66,7 @@ const patchRequest = async ({ newSettings, endPoint }) => {
       },
       withCredentials: false,
     });
-    console.log(response);
+    // console.log(response);
 
     return response.data;
   } catch (error) {

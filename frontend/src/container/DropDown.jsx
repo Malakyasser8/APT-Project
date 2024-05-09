@@ -13,7 +13,6 @@ import RenameShareModal from "../components/RenameShareModal";
 export function DropDown({ documentId, refetch, owned }) {
   const mutation = useMutation(postRequest);
   const handleDelete = () => {
-    console.log("fileid", documentId);
     mutation.mutate(
       {
         endPoint: `api/files/delete/${documentId}`,
