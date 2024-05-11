@@ -73,7 +73,7 @@ function Document() {
           </div>
         </Navbar>
       </div>
-      {showEditor && <TextEditor fileContent={response || ""} />}
+      {showEditor && <TextEditor fileContent={response || ""} fileId={id}/>}
       <CreateDocumentModal open={openCDModal} handleOpen={handleOpenCDModal} />
     </div>
   );

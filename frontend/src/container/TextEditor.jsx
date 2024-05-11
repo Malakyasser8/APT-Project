@@ -1,16 +1,30 @@
 import React, { useState, useRef, useEffect } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css"; // Import Quill styles
+import { useMutation } from "react-query";
+import { postRequest } from "../API/User";
 
 let webSocket;
 let oldContent = "";
 let version = 0;
 let changesQueue = [];
 
-const TextEditor = ({ fileContent }) => {
-  // const [quill, setQuill] = useState(fileContent);
-  // const quillRef = useRef(null);
+const TextEditor = ({ fileContent, fileId }) => {
   const quillRef = useRef(null);
+
+  const saveMutation = useMutation(
+    (newContent) =>
+      postRequest({
+        endPoint: `api/files/save/${fileId}`,
+        data: { content: newContent },
+      }),
+    {
+      onSuccess: () => {},
+      onError: () => {
+        console.log("Error in save mutation");
+      },
+    }
+  );
 
   useEffect(() => {
     if (!quillRef.current) {
@@ -25,7 +39,6 @@ const TextEditor = ({ fileContent }) => {
     }
 
     if (quillRef.current) {
-      // Attach event listener to detect text change in Quill editor
       quillRef.current.on("text-change", function (delta, oldDelta, source) {
         console.log("DELTA", delta.ops);
         let isDelete = false;
@@ -53,7 +66,7 @@ const TextEditor = ({ fileContent }) => {
             } else if (boldValue == false) {
               isBold = false;
             } else {
-              isBold = null; // Handle other cases (e.g., null)
+              isBold = null;
             }
           }
           if (
@@ -66,10 +79,11 @@ const TextEditor = ({ fileContent }) => {
             } else if (val == false) {
               isItalic = false;
             } else {
-              isItalic = null; // Handle other cases (e.g., null)
+              isItalic = null;
             }
           }
         });
+        saveMutation.mutate(quillRef.current.root.innerHTML);
         if (source == "user" && source != "api") {
           console.log("in handle change");
           handleTextChange(isDelete, isBold, isItalic, isInsert, currentIndex);
@@ -92,10 +106,13 @@ const TextEditor = ({ fileContent }) => {
     };
   }, []); // Empty dependency array to run only once on mount (window load)
   function setupWebSocket() {
-    const url = "ws://localhost:3001/chat";
+    const url = `ws://192.168.8.102:3001/chat/${fileId}`;
     webSocket = !webSocket ? new WebSocket(url) : webSocket;
     // quill = quillRef.current.getEditor();
 
+    // if (!webSocket || webSocket.readyState === WebSocket.CLOSED) {
+    //   console.log("WebSocket connection closed or not found");
+    // }
     webSocket.onopen = function (event) {
       console.log("WebSocket connection established");
       // console.log("WebSocket", webSocket);
@@ -135,7 +152,6 @@ const TextEditor = ({ fileContent }) => {
       version++;
       oldContent = quillRef.current.root.innerHTML;
     };
-
     webSocket.onclose = function (event) {
       console.log("WebSocket connection closed");
     };
@@ -229,18 +245,15 @@ const TextEditor = ({ fileContent }) => {
     if (changes.length > 0) {
       console.log("changes", changes);
       // console.log("webSocket", webSocket);
-      webSocket.send(JSON.stringify(changes[0]));
+      if (webSocket.readyState === WebSocket.OPEN) {
+        webSocket.send(JSON.stringify(changes[0]));
+      } else {
+        console.error('WebSocket connection is not open.');
+      }
+      
       changesQueue.push(changes[0]);
     }
   }
-
-  const handleEditorChange = () => {
-    console.log("in editpr");
-    // const cleanText =
-    //   new DOMParser().parseFromString(html, "text/html").body.textContent || "";
-    // setEditorHtml(html);
-    // const quill = quillRef.current?.getEditor();
-  };
 
   return (
     <>

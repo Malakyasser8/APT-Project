@@ -25,7 +25,6 @@ import com.Backend.APTBackend.models.User;
 import com.Backend.APTBackend.services.UserService;
 import com.Backend.APTBackend.services.FileService;
 
-
 import jakarta.validation.Valid;
 import lombok.Data;
 
@@ -74,7 +73,6 @@ public class FileController {
         Boolean status = fileService.renameFile(user, fileId, filename);
         return new ResponseEntity<Boolean>(status, HttpStatus.OK);
 
-        
     }
 
     @GetMapping("/open/{fileId}")
@@ -91,6 +89,27 @@ public class FileController {
 
         File file = fileService.openFile(user, fileId);
         return new ResponseEntity<File>(file, HttpStatus.OK);
+    }
+
+    @PostMapping("/save/{fileId}")
+    public ResponseEntity<?> saveFile(@PathVariable String fileId, @RequestBody File file,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader == null || authorizationHeader.isEmpty() || authorizationHeader.length() < 9) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Authorization header missing");
+        }
+        User user = userService.verifyUserToken(authorizationHeader);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
+        }
+        String content = file.getContent();
+        Boolean isSaved = fileService.saveFile(fileId, content);
+        if (isSaved)
+            return ResponseEntity.ok()
+                    .body("File saved successfully");
+        else
+            return ResponseEntity.badRequest()
+                    .body("File not found");
+
     }
 
     @PostMapping("/delete/{fileId}")
@@ -122,9 +141,11 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
         }
         boolean shared = fileService.shareFile(fileId, username.getUsername(), "editor");
-        if(shared){
-        return new ResponseEntity<Boolean>(shared, HttpStatus.OK);}
-        else{return ResponseEntity.status(HttpStatus.FORBIDDEN).body("username not found");}
+        if (shared) {
+            return new ResponseEntity<Boolean>(shared, HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("username not found");
+        }
     }
 
     @PostMapping("/sharetoViewer/{fileId}")
@@ -140,9 +161,11 @@ public class FileController {
         }
 
         boolean shared = fileService.shareFile(fileId, userToShareWith.getUsername(), "viewer");
-        if(shared){
-            return new ResponseEntity<Boolean>(shared, HttpStatus.OK);}
-            else{return ResponseEntity.status(HttpStatus.FORBIDDEN).body("username not found");}
+        if (shared) {
+            return new ResponseEntity<Boolean>(shared, HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("username not found");
+        }
     }
 
     @GetMapping("/owned")
@@ -158,8 +181,9 @@ public class FileController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
         }
-       
-        return new ResponseEntity<List<File>>(fileService.getFilesUserOwned(user.get_id() , pageNum , pageSize), HttpStatus.OK);
+
+        return new ResponseEntity<List<File>>(fileService.getFilesUserOwned(user.get_id(), pageNum, pageSize),
+                HttpStatus.OK);
     }
 
     @GetMapping("/shared")
@@ -175,8 +199,9 @@ public class FileController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token is invalid or expired");
         }
-       
-        return new ResponseEntity<List<File>>(fileService.getUserSharedFiles(user.get_id() , pageNum , pageSize), HttpStatus.OK);
+
+        return new ResponseEntity<List<File>>(fileService.getUserSharedFiles(user.get_id(), pageNum, pageSize),
+                HttpStatus.OK);
     }
 
 }
