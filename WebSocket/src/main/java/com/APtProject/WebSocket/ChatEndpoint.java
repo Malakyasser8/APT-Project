@@ -1,7 +1,6 @@
 package com.APtProject.WebSocket;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.google.gson.Gson;
 
@@ -14,7 +13,6 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,31 +22,21 @@ import java.util.Set;
 @Component
 public class ChatEndpoint {
     private static Map<String, Set<Session>> documentSessions = new HashMap<>();
+    private static Map<String, Integer> documentVersions = new HashMap<>();
+    private static Map<String, ArrayList<AckBody>> documentPastChanges = new HashMap<>();
 
     // private static final Set<Session> sessions = Collections.synchronizedSet(new
     // HashSet<>());
-    private static ArrayList<AckBody> pastChanges = new ArrayList<>();
-    private static Integer version = 0;
+    // private static ArrayList<AckBody> pastChanges = new ArrayList<>();
+    // private static Integer version = 0;
 
     @OnOpen
     public void onOpen(Session session, @PathParam("documentId") String documentId) {
         System.out.println("doc sessions " + documentSessions);
-        // for (Map.Entry<String, Set<Session>> entry : documentSessions.entrySet()) {
-        // String documentId2 = entry.getKey(); // Get the document ID (key) of the
-        // current entry
-        // Set<Session> sessions = entry.getValue(); // Get the sessions associated with
-        // the current document ID
-        // System.out.println("sessions " + sessions);
-        // System.out.println("doc id get " + documentId.toString());
-        // System.out.println("doc id in map " + documentId2.toString());
-        // System.out.println("compare " +
-        // documentId2.toString().equals(documentId.toString()));
-        // }
 
         if (!documentSessions.containsKey(documentId)) {
-            // If not present, add a new entry with an empty HashSet for sessions
             documentSessions.put(documentId, new HashSet<>());
-            
+
             System.out.println("New document added with ID: " + documentId);
         } else {
             System.out.println("Document ID already exists: " + documentId);
@@ -57,7 +45,32 @@ public class ChatEndpoint {
         sessions.add(session);
         System.out.println("sessions " + sessions);
         System.out.println("New session opened for user: " + session + "oin doc id" +
-        documentId);
+                documentId);
+        if (documentVersions.containsKey(documentId)) {
+            AckBody ackBody = new AckBody();
+            ackBody.setIsVersion(true);
+            ackBody.setVersion(documentVersions.get(documentId));
+            Gson g = new Gson();    
+            String jsonMessage = g.toJson(ackBody);
+            try {
+                session.getBasicRemote().sendText(jsonMessage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            documentPastChanges.put(documentId, new ArrayList<>());
+            documentVersions.put(documentId, 0);
+            AckBody ackBody = new AckBody();
+            ackBody.setIsVersion(true);
+            ackBody.setVersion(documentVersions.get(documentId));
+            Gson g = new Gson();    
+            String jsonMessage = g.toJson(ackBody);
+            try {
+                session.getBasicRemote().sendText(jsonMessage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @OnClose
@@ -65,8 +78,11 @@ public class ChatEndpoint {
         Set<Session> sessions = documentSessions.get(documentId);
         sessions.remove(session);
         System.out.println("Session closed for user: " + session);
-        pastChanges.clear();
-        version = 0;
+        if (sessions.isEmpty()) {
+            documentSessions.remove(documentId);
+            documentVersions.remove(documentId);
+            documentPastChanges.remove(documentId);
+        }
     }
 
     @OnMessage
@@ -79,9 +95,10 @@ public class ChatEndpoint {
 
         AckBody change = ackBody.clone();
         AckBody unchanged = ackBody.clone();
-        if (change.getVersion() < version) {
+        System.out.println("Da el document version" + documentVersions.get(documentId)+ " Da el change version" + change.getVersion());
+        if (change.getVersion() < documentVersions.get(documentId)) {
             System.out.println("Old version received");
-            for (AckBody pastchange : pastChanges) {
+            for (AckBody pastchange : documentPastChanges.get(documentId)) {
                 // System.out.println("In for lopp");
                 // System.out.println("pastchange.getVersion()" + pastchange.getVersion()+
                 // "change.getVersion()" + change.getVersion());
@@ -101,12 +118,14 @@ public class ChatEndpoint {
         for (Session session : sessions) {
             if (!session.getId().equals(senderSession.getId())) {
                 change.setIsAck(false);
+                change.setIsVersion(false);
                 String jsonMessage = g.toJson(change);
                 session.getBasicRemote().sendText(jsonMessage);
                 System.out.println("DATA SENT message to send to client CHANGE:" + change + " to:" + session.getId());
                 System.out.println("DATA SENT message to send to client:" + jsonMessage + " to:" + session.getId());
             } else {
                 unchanged.setIsAck(true);
+                unchanged.setIsVersion(false);
                 String jsonMessage = g.toJson(unchanged);
                 session.getBasicRemote().sendText(jsonMessage);
                 System.out.println(
@@ -114,9 +133,12 @@ public class ChatEndpoint {
                 System.out.println("Ack SENT message to send to client:" + jsonMessage + " to:" + session.getId());
             }
         }
-
-        ++version;
+        int version = documentVersions.get(documentId);
+        version++;
+        documentVersions.put(documentId, version);
+        ArrayList<AckBody> pastChanges = documentPastChanges.get(documentId);
         pastChanges.add(change);
+        documentPastChanges.put(documentId, pastChanges);
         System.out.println("Server's version" + version);
     }
 }

@@ -21,6 +21,7 @@ public class AckBody {
     private Boolean isItalic;
     private Boolean isInsert;
     private Integer version;
+    private Boolean isVersion;
 
     @Override
     protected AckBody clone() {
