@@ -4,13 +4,13 @@ import "quill/dist/quill.snow.css"; // Import Quill styles
 import { useMutation } from "react-query";
 import { postRequest } from "../API/User";
 
-let webSocket;
-let oldContent = "";
-let version = 0;
-let changesQueue = [];
-
 const TextEditor = ({ fileContent, fileId }) => {
+  let webSocket;
+  let oldContent = "";
+  let version = 0;
+  let changesQueue = [];
   const quillRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   const saveMutation = useMutation(
     (newContent) =>
@@ -27,6 +27,8 @@ const TextEditor = ({ fileContent, fileId }) => {
   );
 
   useEffect(() => {
+    let timer = null; // Declare timer variable
+
     if (!quillRef.current) {
       const editor = new Quill("#editor-container", {
         theme: "snow",
@@ -40,52 +42,57 @@ const TextEditor = ({ fileContent, fileId }) => {
 
     if (quillRef.current) {
       quillRef.current.on("text-change", function (delta, oldDelta, source) {
-        console.log("DELTA", delta.ops);
-        let isDelete = false;
-        let isInsert = false;
-        let isBold = false;
-        let isItalic = false;
-        let currentIndex = 0;
-        delta.ops.forEach((operation) => {
-          if (operation.delete) {
-            isDelete = true;
-          }
-          if (operation.retain && !operation.attributes) {
-            currentIndex += operation.retain;
-          }
-          if (operation.insert) {
-            isInsert = true;
-          }
-          if (
-            operation.attributes &&
-            operation.attributes.hasOwnProperty("bold")
-          ) {
-            const boldValue = operation.attributes.bold;
-            if (boldValue == true) {
-              isBold = true;
-            } else if (boldValue == false) {
-              isBold = false;
-            } else {
-              isBold = null;
-            }
-          }
-          if (
-            operation.attributes &&
-            operation.attributes.hasOwnProperty("italic")
-          ) {
-            const val = operation.attributes.italic;
-            if (val == true) {
-              isItalic = true;
-            } else if (val == false) {
-              isItalic = false;
-            } else {
-              isItalic = null;
-            }
-          }
-        });
-        saveMutation.mutate(quillRef.current.root.innerHTML);
+        setIsTyping(true);
+        clearTimeout(timer); // Reset the timer on text change
+        timer = setTimeout(() => {
+          setIsTyping(false);
+          saveMutation.mutate(quillRef.current.root.innerHTML);
+        }, 2000);
         if (source == "user" && source != "api") {
-          console.log("in handle change");
+          console.log("DELTA", delta.ops);
+          let isDelete = false;
+          let isInsert = false;
+          let isBold = false;
+          let isItalic = false;
+          let currentIndex = 0;
+          delta.ops.forEach((operation) => {
+            if (operation.delete) {
+              isDelete = true;
+            }
+            if (operation.retain && !operation.attributes) {
+              currentIndex += operation.retain;
+            }
+            if (operation.insert) {
+              isInsert = true;
+            }
+            if (
+              operation.attributes &&
+              operation.attributes.hasOwnProperty("bold")
+            ) {
+              const boldValue = operation.attributes.bold;
+              if (boldValue == true) {
+                isBold = true;
+              } else if (boldValue == false) {
+                isBold = false;
+              } else {
+                isBold = null;
+              }
+            }
+            if (
+              operation.attributes &&
+              operation.attributes.hasOwnProperty("italic")
+            ) {
+              const val = operation.attributes.italic;
+              if (val == true) {
+                isItalic = true;
+              } else if (val == false) {
+                isItalic = false;
+              } else {
+                isItalic = null;
+              }
+            }
+          });
+          console.log("in handle change ", source);
           handleTextChange(isDelete, isBold, isItalic, isInsert, currentIndex);
           oldContent = quillRef.current.root.innerHTML;
         }
@@ -95,6 +102,7 @@ const TextEditor = ({ fileContent, fileId }) => {
     setupWebSocket();
     oldContent = "";
     return (editor) => {
+      clearTimeout(timer);
       if (webSocket && webSocket.readyState === WebSocket.OPEN) {
         webSocket.close();
       }
@@ -106,7 +114,7 @@ const TextEditor = ({ fileContent, fileId }) => {
     };
   }, []); // Empty dependency array to run only once on mount (window load)
   function setupWebSocket() {
-    const url = `ws://192.168.8.102:3001/chat/${fileId}`;
+    const url = `ws://192.168.1.15:3001/chat/${fileId}`;
     webSocket = !webSocket ? new WebSocket(url) : webSocket;
     // quill = quillRef.current.getEditor();
 
@@ -120,37 +128,42 @@ const TextEditor = ({ fileContent, fileId }) => {
     webSocket.onmessage = function (event) {
       const data = JSON.parse(event.data);
       console.log("recieved", data);
-      // data.forEach((change) => {
-      // });
-      if (!data.isAck) {
-        changesQueue.forEach(function (change) {
-          if (data.index > change.index) {
-            // console.log("ADDED 1", data.index);
-            data.index = data.index + 1;
-          }
-        });
-        modifyCharInText(
-          data.index,
-          data.character,
-          data.isDelete,
-          data.isBold,
-          data.isItalic,
-          data.isInsert
-        );
+      if (data.isVersion) {
+        version = data.version;
       } else {
-        changesQueue = changesQueue.filter((change) => {
-          return !(
-            change.index == data.index &&
-            change.character == data.character &&
-            change.isDelete == data.isDelete &&
-            change.isBold == data.isBold &&
-            change.isItalic == data.isItalic &&
-            change.isInsert == data.isInsert
+        // data.forEach((change) => {
+        // });
+
+        if (!data.isAck) {
+          changesQueue.forEach(function (change) {
+            if (data.index > change.index) {
+              console.log("ADDED 1", data.index);
+              data.index = data.index + 1;
+            }
+          });
+          modifyCharInText(
+            data.index,
+            data.character,
+            data.isDelete,
+            data.isBold,
+            data.isItalic,
+            data.isInsert
           );
-        });
+        } else {
+          changesQueue = changesQueue.filter((change) => {
+            return !(
+              change.index == data.index &&
+              change.character == data.character &&
+              change.isDelete == data.isDelete &&
+              change.isBold == data.isBold &&
+              change.isItalic == data.isItalic &&
+              change.isInsert == data.isInsert
+            );
+          });
+        }
+        version++;
+        oldContent = quillRef.current.root.innerHTML;
       }
-      version++;
-      oldContent = quillRef.current.root.innerHTML;
     };
     webSocket.onclose = function (event) {
       console.log("WebSocket connection closed");
@@ -177,6 +190,7 @@ const TextEditor = ({ fileContent, fileId }) => {
       quillRef.current.formatText(index, 1, "italic", true);
     } else {
       let text = quillRef.current.root.innerHTML.replace(/<\/?[^>]+(>|$)/g, "");
+      console.log("text", text);
       let length = text.length;
       let formatsArray = [];
       for (let i = 0; i < length; i++) {
@@ -211,6 +225,8 @@ const TextEditor = ({ fileContent, fileId }) => {
     const strippedOldContent = oldContent.replace(/<\/?[^>]+(>|$)/g, ""); //mal
     const strippedNewContent = newContent.replace(/<\/?[^>]+(>|$)/g, ""); //ml
     let character = strippedNewContent[currentIndex]; //abc
+    console.log("old", oldContent);
+    console.log("new", newContent);
     if (currentIndex >= strippedNewContent.length)
       character = strippedOldContent[currentIndex];
     let changes = [];
@@ -248,9 +264,9 @@ const TextEditor = ({ fileContent, fileId }) => {
       if (webSocket.readyState === WebSocket.OPEN) {
         webSocket.send(JSON.stringify(changes[0]));
       } else {
-        console.error('WebSocket connection is not open.');
+        console.error("WebSocket connection is not open.");
       }
-      
+
       changesQueue.push(changes[0]);
     }
   }
