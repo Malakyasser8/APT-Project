@@ -9,7 +9,7 @@ let oldContent = "";
 let version = 0;
 let changesQueue = [];
 
-const TextEditor = ({ fileContent, fileId }) => {
+const TextEditor = ({ fileContent, fileId  , canEdit}) => {
   const quillRef = useRef(null);
 
   const saveMutation = useMutation(
@@ -31,6 +31,7 @@ const TextEditor = ({ fileContent, fileId }) => {
       const editor = new Quill("#editor-container", {
         theme: "snow",
         placeholder: "Write something...",
+        readOnly: !canEdit,
       });
       if (fileContent) {
         editor.root.innerHTML = fileContent;
@@ -106,7 +107,7 @@ const TextEditor = ({ fileContent, fileId }) => {
     };
   }, []); // Empty dependency array to run only once on mount (window load)
   function setupWebSocket() {
-    const url = `ws://192.168.8.102:3001/chat/${fileId}`;
+    const url = `ws://192.168.1.206:3001/chat/${fileId}`;
     webSocket = !webSocket ? new WebSocket(url) : webSocket;
     // quill = quillRef.current.getEditor();
 
@@ -120,8 +121,13 @@ const TextEditor = ({ fileContent, fileId }) => {
     webSocket.onmessage = function (event) {
       const data = JSON.parse(event.data);
       console.log("recieved", data);
+      console.log("dataa" , data.index);
       // data.forEach((change) => {
       // });
+      if(data.index == null)
+        {
+          data.index = 0;
+        }
       if (!data.isAck) {
         changesQueue.forEach(function (change) {
           if (data.index > change.index) {

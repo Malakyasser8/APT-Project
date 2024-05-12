@@ -4,6 +4,7 @@ import {
   ListItemSuffix,
   Card,
   IconButton,
+  ListItemPrefix,
 } from "@material-tailwind/react";
 import { DropDown } from "./DropDown";
 import { useMutation } from "react-query";
@@ -37,17 +38,17 @@ export function DocumentList({ endpoint, owned }) {
               <ListItem
                 key={document._id}
                 ripple={false}
-                className="py-1 pr-1 pl-4 text-white hover:bg-black"
-              >
-                <div
+                className="!hover:bg-black py-1 pr-1 pl-4 text-white  "
+               
                   onClick={() => {
-                    navigate(`/document/${document._id}`);
-                  }}
+                   navigate(`/document/${document._id}`);
+                 }}
                 >
+                
                   {document.filename}
-                </div>
+                
                 <ListItemSuffix>
-                  <IconButton variant="text" color="blue-gray">
+                  <IconButton variant="text" onClick={(e) => e.stopPropagation()}>
                     <DropDown
                       documentId={document._id}
                       refetch={triggerRefetch}

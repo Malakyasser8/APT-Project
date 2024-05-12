@@ -27,10 +27,17 @@ function Document() {
   const { id } = useParams();
   const [response, setResponse] = useState("");
   const [showEditor, setShowEditor] = useState(false);
+  const [canEdit, setCanEdit] = useState(true);
   useEffect(() => {
     fetchReq.mutate(`api/files/open/${id}`, {
       onSuccess: (data) => {
         console.log("fileopened", data.data.content);
+        if(data.data.viewers.map((viewer) => {
+          if(viewer.username == localStorage.getItem("username")) 
+            {
+              setCanEdit(false)
+            }
+        }));
         setShowEditor(true);
         setResponse(data.data.content);
       },
@@ -40,7 +47,7 @@ function Document() {
 
   return (
     <div>
-      <div className="my-2 mb-8">
+      <div >
         <Navbar className="sticky  h-max max-w-full rounded-none px-4 py-2 lg:px-8 lg:py-4">
           <div className="flex items-center justify-between text-blue-gray-900">
             <Typography
@@ -51,6 +58,12 @@ function Document() {
             >
               Ree Docs
             </Typography>
+            {!canEdit && <div className=" bg-orange-400 rounded p-1 text- w-28 text-center">
+              <Typography className="font-semibold">
+                View Only
+              </Typography>
+            </div>}
+      
             <div className="flex items-center gap-4">
               <div className="mr-4 lg:block">{username}</div>
               <div onClick={handleOpenCDModal}>
@@ -73,7 +86,9 @@ function Document() {
           </div>
         </Navbar>
       </div>
-      {showEditor && <TextEditor fileContent={response || ""} fileId={id}/>}
+      
+   
+      {showEditor && <TextEditor fileContent={response || ""} fileId={id} canEdit={canEdit}/>}
       <CreateDocumentModal open={openCDModal} handleOpen={handleOpenCDModal} />
     </div>
   );
