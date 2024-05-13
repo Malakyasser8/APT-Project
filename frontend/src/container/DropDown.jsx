@@ -41,8 +41,12 @@ export function DropDown({ documentId, refetch, owned }) {
         </MenuHandler>
         <MenuList className="bg-black text-white">
           <MenuItem onClick={handleOpenRModal}>Rename</MenuItem>
-          {owned && <MenuItem onClick={handleDelete}>Delete</MenuItem>}
-          <MenuItem onClick={handleOpenSModal}>Share</MenuItem>
+          {owned && (
+            <>
+              <MenuItem onClick={handleDelete}>Delete</MenuItem>
+              <MenuItem onClick={handleOpenSModal}>Share</MenuItem>
+            </>
+          )}
         </MenuList>
       </Menu>
       <RenameShareModal
