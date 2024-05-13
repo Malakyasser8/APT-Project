@@ -133,14 +133,30 @@ public class FileService {
         // return false;
     }
 
-    public List<File> getFilesUserOwned(String owner , int pageNum , int  pageSize){
+    public Boolean saveFile(String fileId, String content) {
+        File oldFile = FileRepository.findByFileId(fileId);
+        if (oldFile == null) {
+            System.out.println("File not found");
+            return false;
+        } else {
+            try {
+                oldFile.setContent(content);
+                FileRepository.save(oldFile);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+    }
+
+    public List<File> getFilesUserOwned(String owner, int pageNum, int pageSize) {
         List<File> owned = FileRepository.findByOwnerId(owner);
         int fromIndex = (pageNum - 1) * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, owned.size());
         return owned.subList(fromIndex, toIndex);
     }
 
-    public List<File> getUserSharedFiles(String editor , int pageNum , int  pageSize){
+    public List<File> getUserSharedFiles(String editor, int pageNum, int pageSize) {
         List<File> editorFiles = FileRepository.findByEditorsId(editor);
         List<File> viewer = FileRepository.findByViewersId(editor);
         int fromIndex = (pageNum - 1) * pageSize;
@@ -150,8 +166,6 @@ public class FileService {
         return editorFiles.subList(fromIndex, toIndex);
 
     }
-
-
 
     // Rawan: Access Control
     public boolean isOwner(String fileId, User user) {
@@ -193,10 +207,10 @@ public class FileService {
 
     public boolean shareFile(String fileId, String username, String role) {
         File foundFile = FileRepository.findByFileId(fileId);
-        Optional<User> user=userservice.findByUsername(username);
+        Optional<User> user = userservice.findByUsername(username);
         System.out.println(user);
-        if(user.isPresent()){
-            User userr=user.get();
+        if (user.isPresent()) {
+            User userr = user.get();
             if (foundFile == null) {
                 return false;
             } else {
@@ -234,8 +248,7 @@ public class FileService {
                 FileRepository.save(foundFile);
                 return true;
             }
-        }
-        else{
+        } else {
             return false;
         }
     }

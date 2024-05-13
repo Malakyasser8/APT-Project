@@ -18,7 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Document(collection = "user")
+@Document(collection = "file")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
