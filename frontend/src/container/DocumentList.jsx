@@ -15,6 +15,7 @@ export function DocumentList({ endpoint, owned }) {
   const fetchReq = useMutation(fetchRequest);
   const [response, setResponse] = useState();
   const [refetchKey, setRefetchKey] = useState(0);
+  let isViewer = false;
   const navigate = useNavigate();
   useEffect(() => {
     fetchReq.mutate(endpoint, {
@@ -35,6 +36,7 @@ export function DocumentList({ endpoint, owned }) {
         {response && (
           <>
             {response.map((document) => (
+              isViewer = document.viewers.find(user => user.username == localStorage.getItem("username")),
               <ListItem
                 key={document._id}
                 ripple={false}
@@ -52,7 +54,7 @@ export function DocumentList({ endpoint, owned }) {
                     <DropDown
                       documentId={document._id}
                       refetch={triggerRefetch}
-                      owned={owned}
+                      owned={!isViewer}
                     />
                   </IconButton>
                 </ListItemSuffix>
