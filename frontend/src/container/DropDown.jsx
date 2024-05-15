@@ -35,12 +35,12 @@ export function DropDown({ documentId, refetch, owned }) {
     <>
       <Menu>
         <MenuHandler>
-          <Button className="bg-black text-white px-4 py-2   focus:outline-none focus:ring focus:border-blue-300">
+          {<Button className="bg-black text-white px-4 py-2   focus:outline-none focus:ring focus:border-blue-300">
             ...
-          </Button>
+          </Button>}
         </MenuHandler>
         <MenuList className="bg-black text-white">
-          <MenuItem onClick={handleOpenRModal}>Rename</MenuItem>
+          {owned && <MenuItem onClick={handleOpenRModal}>Rename</MenuItem>}
           {owned && (
             <>
               <MenuItem onClick={handleDelete}>Delete</MenuItem>
